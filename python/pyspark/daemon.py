@@ -30,6 +30,7 @@ from signal import SIGHUP, SIGTERM, SIGCHLD, SIG_DFL, SIG_IGN, SIGINT
 
 from pyspark.worker import main as worker_main
 from pyspark.serializers import read_int, write_int
+from pyspark.rng_utils import init_rngs
 
 
 def compute_real_exit_code(exit_code):
@@ -57,6 +58,9 @@ def worker(sock):
     infile = os.fdopen(os.dup(sock.fileno()), "rb", 65536)
     outfile = os.fdopen(os.dup(sock.fileno()), "wb", 65536)
     exit_code = 0
+
+    init_rngs()
+
     try:
         worker_main(infile, outfile)
     except SystemExit as exc:
