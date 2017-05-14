@@ -48,6 +48,8 @@ setClass("FPGrowthModel", slots = list(jobj = "jobj"),
 #' @name spark.fpGrowth
 #' @aliases spark.fpGrowth,SparkDataFrame-method
 #' @export
+#' @template generic.ml
+#' @templateVar name spark.fpGrowth
 #' @examples
 #' \dontrun{
 #' raw_data <- read.df(
