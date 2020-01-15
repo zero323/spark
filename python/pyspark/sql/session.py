@@ -597,8 +597,10 @@ class SparkSession(SparkConversionMixin):
             has_pandas = False
         if has_pandas and isinstance(data, pandas.DataFrame):
             # Create a DataFrame from pandas DataFrame.
-            return super(SparkSession, self).createDataFrame(
-                data, schema, verifySchema, samplingRatio)
+            data, schema = self._SparkConversionMixin__prepareDataAndSchema(
+                data, schema)
+            #return self._create_dataframe(
+            #    data, schema, verifySchema, samplingRatio)
         return self._create_dataframe(data, schema, verifySchema, samplingRatio)
 
     def _create_dataframe(self, data, schema, verifySchema, samplingRatio):
