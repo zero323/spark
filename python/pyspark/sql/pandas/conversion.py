@@ -223,7 +223,7 @@ class SparkConversionMixin(object):
     Min-in for the conversion from pandas to Spark. Currently, only :class:`SparkSession`
     can use this class.
     """
-    def createDataFrame(self, data, schema=None, samplingRatio=None, verifySchema=True):
+    def __createDataFrame(self, data, schema=None, samplingRatio=None, verifySchema=True):
         from pyspark.sql import SparkSession
 
         assert isinstance(self, SparkSession)
