@@ -1226,6 +1226,18 @@ class DataStreamWriter(object):
         else:
             return self._sq(self._jwrite.start(path))
 
+    @since(3.1)
+    def saveAsTable(self, name, outputMode=None, queryName=None, **options):
+        """Starts the execution of the streaming query, which will continually output results to the given
+        table as new data
+
+        .. note:: Evolving.
+        """
+        self.outputMode(outputMode).options(**options)
+        if queryName is not None:
+            self.queryName(queryName)
+        return self._sq(self._jwrite.saveAsTable(name))
+
 
 def _test():
     import doctest
