@@ -22,6 +22,7 @@ import sys
 import functools
 import warnings
 from itertools import chain
+from functools import singledispatch
 
 from pyspark import since, SparkContext
 from pyspark.rdd import PythonEvalType
@@ -87,6 +88,7 @@ def _options_to_str(options=None):
     return {}
 
 
+@singledispatch
 def lit(col):
     """
     Creates a :class:`Column` of literal value.
@@ -105,35 +107,42 @@ def lit(col):
     ... ).take(1)
     [Row(data={'height': 5}, languages=['python', 'scala'])]
     """
-    if isinstance(col, Column):
-        return col
+    return _invoke_function("lit", col)
 
-    elif isinstance(col, list):
-        return array(*[lit(x) for x in col])
 
-    elif isinstance(col, tuple):
-        fields = (
-            # Named tuple
-            col._fields if hasattr(col, "_fields")
-            # PySpark Row
-            else col.__fields__ if hasattr(col, "__fields__")
-            # Other
-            else [f"_{i + 1}" for i in range(len(col))]
-        )
+@lit.register(Column)
+def _(col):
+    return col
 
-        return struct(*[
-            lit(x).alias(a)
-            for x, a in zip(col, fields)
-        ])
 
-    elif isinstance(col, dict):
-        return create_map(*chain.from_iterable(
-            (lit(k), lit(v))
-            for k, v in col.items()
-        ))
+@lit.register(list)
+def _(col):
+    return array(*[lit(x) for x in col])
 
-    else:
-        return _invoke_function("lit", col)
+
+@lit.register(tuple)
+def _(col):
+    fields = (
+        # Named tuple
+        col._fields if hasattr(col, "_fields")
+        # PySpark Row
+        else col.__fields__ if hasattr(col, "__fields__")
+        # Other
+        else [f"_{i + 1}" for i in range(len(col))]
+    )
+
+    return struct(*[
+        lit(x).alias(a)
+        for x, a in zip(col, fields)
+    ])
+
+
+@lit.register(dict)
+def _(col):
+    return create_map(*chain.from_iterable(
+        (lit(k), lit(v))
+        for k, v in col.items()
+    ))
 
 
 @since(1.3)
